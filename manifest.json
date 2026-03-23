@@ -1,22 +1,33 @@
 {
   "name": "BMO",
   "short_name": "BMO",
-  "description": "BMO da Adventure Time — Flappy Bird e Calcolatrice",
+  "description": "BMO from Adventure Time \u2014 Flappy Bird, Calculator & Pomodoro",
+  "id": "/BmoPlayground/",
   "start_url": "/BmoPlayground/",
+  "scope": "/BmoPlayground/",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#3aaa88",
   "theme_color": "#3aaa88",
+  "lang": "en",
+  "categories": [
+    "games",
+    "utilities",
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": []
 }

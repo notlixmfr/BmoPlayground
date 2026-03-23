@@ -1044,5 +1044,12 @@ showPanel('menu');
 updC('0');
 menuHL(0);
 </script>
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js")
+    .then(()=>console.log("SW registered"))
+    .catch(e=>console.log("SW error",e));
+}
+</script>
 </body>
 </html>
