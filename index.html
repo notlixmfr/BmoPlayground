@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>BMO</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#3aaa88"/>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -144,8 +146,8 @@ html, body {
 }
 .menu-hint {
   font-family: 'Press Start 2P', monospace;
-  font-size: clamp(.16rem,1.1vw,.25rem);
-  color: rgba(0,255,200,.25); text-align: center; line-height: 2.2;
+  font-size: clamp(.32rem,2.2vw,.48rem);
+  color: rgba(0,255,200,.6); text-align: center; line-height: 2.2;
 }
 
 /* ── CALCULATOR ── */
@@ -203,6 +205,77 @@ html, body {
 /* ── FLAPPY ── */
 #p-flappy { padding:0; background:#050d07; }
 #fcanvas { position:absolute; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+
+
+/* ── POMODORO ── */
+#p-pomo {
+  background: radial-gradient(ellipse at 50% 30%, #0d1a22 0%, #050a0d 100%);
+  gap: clamp(10px,2.5vh,18px);
+  padding: clamp(10px,3vw,18px);
+  justify-content: center;
+}
+.pomo-mode-row {
+  display: flex; gap: clamp(8px,2.5vw,14px);
+}
+.pomo-mode {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.28rem,2vw,.42rem);
+  padding: clamp(5px,1.5vw,8px) clamp(10px,3vw,16px);
+  border-radius: 8px;
+  border: 2px solid rgba(0,255,200,.15);
+  color: rgba(0,255,200,.3);
+  letter-spacing: .5px;
+  transition: all .15s;
+}
+.pomo-mode.active {
+  border-color: var(--glow);
+  color: var(--glow);
+  background: rgba(0,255,200,.1);
+  box-shadow: 0 0 12px rgba(0,255,200,.25);
+}
+.pomo-arc-wrap {
+  position: relative;
+  /* fill most of the remaining space */
+  width: min(55vw, 42vh);
+  height: min(55vw, 42vh);
+  flex-shrink: 0;
+}
+#pomo-svg { width:100%; height:100%; }
+.pomo-time-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+}
+.pomo-time {
+  font-family: 'VT323', monospace;
+  font-size: clamp(3.5rem,16vw,6rem);
+  color: var(--glow);
+  text-shadow: 0 0 14px var(--glow);
+  line-height: 1;
+}
+.pomo-session {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.26rem,1.8vw,.38rem);
+  color: rgba(0,255,200,.5);
+  letter-spacing: .5px;
+}
+.pomo-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.3rem,2vw,.44rem);
+  color: rgba(0,255,200,.6);
+  text-align: center; line-height: 2.4;
+}
+@keyframes pomo-pulse {
+  0%,100%{ text-shadow: 0 0 10px var(--glow); }
+  50%    { text-shadow: 0 0 22px var(--glow), 0 0 40px rgba(0,255,200,.4); }
+}
+.pomo-time.running { animation: pomo-pulse 1s ease-in-out infinite; }
+@keyframes pomo-break-pulse {
+  0%,100%{ text-shadow: 0 0 10px #60ccff; }
+  50%    { text-shadow: 0 0 22px #60ccff, 0 0 40px rgba(80,180,255,.4); }
+}
+.pomo-time.break-running { animation: pomo-break-pulse 1.5s ease-in-out infinite; }
 
 /* ── CONTROLS SECTION ── */
 .ctrl-section {
@@ -374,8 +447,9 @@ html, body {
           <div class="menu-cards">
             <div class="mcard sel" id="mc0"><span class="icon">🐦</span>FLAPPY</div>
             <div class="mcard"     id="mc1"><span class="icon">🔢</span>CALC</div>
+            <div class="mcard"     id="mc2"><span class="icon">🍅</span>POMO</div>
           </div>
-          <div class="menu-hint">◀ ▶ SCEGLI &nbsp; ● CONFERMA</div>
+          <div class="menu-hint">◀ ▶ SELECT &nbsp; ● CONFIRM</div>
         </div>
 
         <!-- CALCULATOR -->
@@ -403,6 +477,31 @@ html, body {
             <button class="cb cb-n" data-a="dot">.</button>
             <button class="cb cb-eq" data-a="eq">=</button>
           </div>
+        </div>
+
+
+        <!-- POMODORO -->
+        <div class="panel off" id="p-pomo">
+          <div class="pomo-mode-row">
+            <div class="pomo-mode active" id="pm-work">FOCUS</div>
+            <div class="pomo-mode"        id="pm-short">BREAK</div>
+            <div class="pomo-mode"        id="pm-long">REST</div>
+          </div>
+          <div class="pomo-arc-wrap">
+            <svg id="pomo-svg" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(0,255,200,.08)" stroke-width="6"/>
+              <circle id="pomo-arc" cx="50" cy="50" r="44" fill="none"
+                stroke="#00ffcc" stroke-width="6"
+                stroke-linecap="round"
+                stroke-dasharray="276.5" stroke-dashoffset="0"
+                transform="rotate(-90 50 50)"/>
+            </svg>
+            <div class="pomo-time-center">
+              <div class="pomo-time" id="pomo-time">25:00</div>
+              <div class="pomo-session" id="pomo-session">#1</div>
+            </div>
+          </div>
+          <div class="pomo-hint">▲▼ TIME &nbsp;&nbsp; ● START/PAUSE<br>◀▶ CHANGE MODE</div>
         </div>
 
         <!-- FLAPPY -->
@@ -449,7 +548,7 @@ let mode    = 'menu';
 let menuSel = 0;
 
 function showPanel(name) {
-  ['menu','calc','flappy'].forEach(n =>
+  ['menu','calc','flappy','pomo'].forEach(n =>
     document.getElementById('p-'+n).classList.toggle('off', n !== name)
   );
   mode = name;
@@ -463,6 +562,7 @@ function mood(m) {
 
 function goMenu() {
   stopFlappy();
+  pomoStop();
   calcClear();
   showPanel('menu');
   mood('');
@@ -473,8 +573,8 @@ function goMenu() {
    MENU
 ════════════════════════════════════ */
 function menuHL(i) {
-  menuSel = i;
-  document.querySelectorAll('.mcard').forEach((el,j) => el.classList.toggle('sel', j===i));
+  menuSel = ((i % 3) + 3) % 3;
+  document.querySelectorAll('.mcard').forEach((el,j) => el.classList.toggle('sel', j===menuSel));
 }
 
 function menuOpen() {
@@ -482,9 +582,12 @@ function menuOpen() {
   if (menuSel === 0) {
     showPanel('flappy');
     requestAnimationFrame(() => requestAnimationFrame(() => { startFlappy(); mood(''); }));
-  } else {
+  } else if (menuSel === 1) {
     showPanel('calc');
     cRow=3; cCol=0; calcFocus(); mood('');
+  } else {
+    showPanel('pomo');
+    pomoEnter(); mood('');
   }
 }
 
@@ -493,10 +596,17 @@ function menuOpen() {
 ════════════════════════════════════ */
 function onDpad(dir) {
   if (mode === 'menu') {
-    if (dir==='l'||dir==='r') menuHL((menuSel+1)%2);
+    if (dir==='l') menuHL(menuSel-1);
+    if (dir==='r') menuHL(menuSel+1);
     if (dir==='c'||dir==='d') menuOpen();
   } else if (mode === 'flappy') {
     fFlap();
+  } else if (mode === 'pomo') {
+    if (dir==='l') pomoMode(-1);
+    if (dir==='r') pomoMode(1);
+    if (dir==='u') pomoAdjust(1);
+    if (dir==='d') pomoAdjust(-1);
+    if (dir==='c') pomoToggle();
   } else if (mode === 'calc') {
     if (dir==='u') cMove(-1, 0);
     if (dir==='d') cMove( 1, 0);
@@ -778,8 +888,8 @@ function startFlappy() {
       drawBMO(bird.x,by,false);
       ctx.font=`${fs(.026,7)}px "Press Start 2P"`;
       ctx.fillStyle='rgba(0,255,200,.7)'; ctx.textAlign='center';
-      ctx.fillText('PREMI IL DPAD',W/2,H-28);
-      ctx.fillText('PER INIZIARE',W/2,H-14);
+      ctx.fillText('PRESS DPAD',W/2,H-28);
+      ctx.fillText('TO START',W/2,H-14);
       return;
     }
 
@@ -823,12 +933,108 @@ function startFlappy() {
       ctx.fillText('BEST:  '+best, W/2,H/2+18);
       if(deadT>22){
         ctx.fillStyle='rgba(0,255,200,.42)';
-        ctx.fillText('DPAD = RIPROVA',W/2,H/2+36);
+        ctx.fillText('DPAD = RETRY',W/2,H/2+36);
         ctx.fillText('🏠 = MENU',     W/2,H/2+52);
       }
     }
   }
   loop();
+}
+
+
+/* ════════════════════════════════════
+   POMODORO
+════════════════════════════════════ */
+const POMO_MODES = [
+  { label:'FOCUS', mins:25, color:'#00ffcc', breakColor:false },
+  { label:'BREAK', mins:5,  color:'#60ccff', breakColor:true  },
+  { label:'REST',  mins:15, color:'#aaffaa', breakColor:true  },
+];
+let pomoModeIdx  = 0;
+let pomoTotal    = 25 * 60;
+let pomoLeft     = 25 * 60;
+let pomoRunning  = false;
+let pomoInterval = null;
+let pomoSession  = 1;
+const CIRC       = 2 * Math.PI * 44; // 276.46
+
+function pomoEnter() {
+  pomoModeIdx = 0; pomoSession = 1;
+  pomoSetMode(0); pomoRender();
+}
+
+function pomoStop() {
+  if (pomoInterval) { clearInterval(pomoInterval); pomoInterval=null; }
+  pomoRunning = false;
+}
+
+function pomoSetMode(idx) {
+  pomoModeIdx = idx;
+  const m = POMO_MODES[idx];
+  pomoTotal   = m.mins * 60;
+  pomoLeft    = pomoTotal;
+  pomoRunning = false;
+  if (pomoInterval) { clearInterval(pomoInterval); pomoInterval=null; }
+  // update mode buttons
+  document.querySelectorAll('.pomo-mode').forEach((el,i) =>
+    el.classList.toggle('active', i===idx)
+  );
+  // update arc color
+  document.getElementById('pomo-arc').style.stroke = m.color;
+  pomoRender();
+}
+
+function pomoMode(dir) {
+  pomoStop();
+  pomoSetMode(((pomoModeIdx + dir) % 3 + 3) % 3);
+}
+
+function pomoAdjust(delta) {
+  if (pomoRunning) return;
+  pomoTotal = Math.max(60, Math.min(60*60, pomoTotal + delta*60));
+  pomoLeft  = pomoTotal;
+  pomoRender();
+}
+
+function pomoToggle() {
+  if (pomoLeft === 0) { pomoSetMode(pomoModeIdx); return; }
+  pomoRunning = !pomoRunning;
+  if (pomoRunning) {
+    pomoInterval = setInterval(() => {
+      pomoLeft--;
+      pomoRender();
+      if (pomoLeft <= 0) {
+        clearInterval(pomoInterval); pomoInterval=null;
+        pomoRunning = false;
+        if (pomoModeIdx === 0) pomoSession++;
+        mood('happy');
+        setTimeout(() => mood(''), 2000);
+      }
+    }, 1000);
+    mood('excited'); setTimeout(()=>mood(''),400);
+  } else {
+    clearInterval(pomoInterval); pomoInterval=null;
+    mood('');
+  }
+}
+
+function pomoRender() {
+  const m = Math.floor(pomoLeft / 60);
+  const s = pomoLeft % 60;
+  const timeEl = document.getElementById('pomo-time');
+  timeEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  // arc classes
+  timeEl.classList.remove('running','break-running');
+  if (pomoRunning) {
+    timeEl.classList.add(POMO_MODES[pomoModeIdx].breakColor ? 'break-running' : 'running');
+  }
+  // arc progress
+  const frac  = pomoTotal > 0 ? pomoLeft / pomoTotal : 0;
+  const offset = CIRC * (1 - frac);
+  document.getElementById('pomo-arc').style.strokeDashoffset = offset;
+  // session
+  document.getElementById('pomo-session').textContent =
+    pomoModeIdx===0 ? '#'+pomoSession : POMO_MODES[pomoModeIdx].label;
 }
 
 /* ════════════════════════════════════
