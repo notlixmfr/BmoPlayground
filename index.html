@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>BMO</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bmo:    #5ecfb1;
+  --bmo-d:  #3aaa8a;
+  --bmo-dd: #2a8a6e;
+  --out:    #1a5848;
+  --scr:    #07120e;
+  --glow:   #00ffcc;
+  --y:      #f0c030;
+  --r:      #e84040;
+  --g2:     #28b848;
+  --w:      #ddd9c8;
+  --fn:     #a8cc90;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: #0a1a12;
+}
+
+.bmo {
+  width: 100vw; height: 100dvh;
+  display: flex; flex-direction: column;
+  background: linear-gradient(168deg, #7ddfc8 0%, #52c8a8 45%, #3aaa88 100%);
+  position: relative; overflow: hidden;
+}
+.bmo::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 36%;
+  background: linear-gradient(to bottom, rgba(255,255,255,.2) 0%, transparent 100%);
+  pointer-events: none; z-index: 0;
+}
+.port {
+  position: absolute; top: 11%;
+  width: 10px; height: 4.5%;
+  background: linear-gradient(to right, var(--bmo-dd), var(--bmo-d));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.4);
+}
+.port-l { left: 0;  border-radius: 0 4px 4px 0; }
+.port-r { right: 0; border-radius: 4px 0 0 4px; }
+
+/* ── SCREEN AREA ── */
+.screen-area {
+  flex: 1; min-height: 0;
+  padding: clamp(10px,2.5vw,18px) clamp(14px,4vw,24px) clamp(6px,1.5vw,10px);
+  display: flex; flex-direction: column;
+  position: relative; z-index: 1;
+}
+.screen-frame {
+  flex: 1; min-height: 0;
+  background: linear-gradient(160deg, #1e5a48, #122e22);
+  border-radius: clamp(14px,4vw,22px);
+  padding: clamp(5px,1.5vw,8px);
+  box-shadow: inset 0 4px 16px rgba(0,0,0,.65),
+              0 3px 0 rgba(255,255,255,.14),
+              0 6px 22px rgba(0,0,0,.4);
+  position: relative;
+}
+.screen-frame::after {
+  content: ''; position: absolute; inset: 3px;
+  border-radius: inherit;
+  box-shadow: 0 0 24px rgba(0,255,210,.18);
+  pointer-events: none;
+}
+.screen {
+  width: 100%; height: 100%;
+  background: var(--scr);
+  border-radius: clamp(9px,2.5vw,15px);
+  position: relative; overflow: hidden;
+}
+.screen::after {
+  content: ''; position: absolute; inset: 0; z-index: 20;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 3px, rgba(0,0,0,.09) 3px, rgba(0,0,0,.09) 4px);
+  pointer-events: none; border-radius: inherit;
+}
+
+/* ── PANELS ── */
+.panel {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: inherit; z-index: 5;
+}
+.panel.off { display: none; }
+@keyframes panelin { from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);} }
+.panel:not(.off) { animation: panelin .18s ease; }
+
+/* ── MENU ── */
+#p-menu {
+  background: radial-gradient(ellipse at 50% 28%, #0d2218 0%, #050d08 100%);
+  gap: clamp(8px,2.5vh,18px);
+}
+.face { display:flex; flex-direction:column; align-items:center; gap:5px; }
+.face-eyes { display:flex; gap:clamp(16px,5.5vw,28px); }
+.feye {
+  width: clamp(14px,4.5vw,20px); height: clamp(14px,4.5vw,20px);
+  background: radial-gradient(circle at 36% 34%, #666, #111);
+  border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,.7);
+  transition: transform .25s;
+}
+.fmouth {
+  width: clamp(26px,8.5vw,40px); height: clamp(9px,3vw,14px);
+  border-bottom: 2.5px solid #3a4a3a;
+  border-radius: 0 0 20px 20px; transition: all .3s;
+}
+.menu-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.28rem,2.1vw,.46rem);
+  color: rgba(0,255,200,.6);
+  text-align: center; line-height: 2.3; letter-spacing: .5px;
+}
+.menu-cards { display:flex; gap:clamp(10px,3vw,16px); }
+.mcard {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding: clamp(10px,3vw,16px) clamp(13px,4vw,20px);
+  border: 2px solid rgba(0,255,200,.12);
+  border-radius: 12px; background: rgba(0,255,200,.03);
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.24rem,1.7vw,.38rem);
+  color: rgba(0,255,200,.45); letter-spacing: .5px;
+  transition: all .15s; pointer-events: none;
+}
+.mcard .icon { font-size: clamp(1.5rem,6.5vw,2rem); }
+.mcard.sel {
+  border-color: var(--glow); background: rgba(0,255,200,.13); color: var(--glow);
+  box-shadow: 0 0 22px rgba(0,255,200,.25), inset 0 0 16px rgba(0,255,200,.07);
+  transform: scale(1.05);
+}
+.menu-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.16rem,1.1vw,.25rem);
+  color: rgba(0,255,200,.25); text-align: center; line-height: 2.2;
+}
+
+/* ── CALCULATOR ── */
+#p-calc {
+  background: linear-gradient(160deg, #060e08 0%, #040806 100%);
+  padding: clamp(6px,1.8vw,10px) clamp(8px,2.5vw,12px);
+  justify-content: flex-start; align-items: stretch; gap:0;
+}
+.c-expr {
+  font-family: 'VT323', monospace;
+  font-size: clamp(.85rem,4vw,1.15rem);
+  color: rgba(0,255,180,.38);
+  text-align: right; min-height:1.1em; letter-spacing:1px; line-height:1.2;
+}
+.c-disp {
+  font-family: 'VT323', monospace;
+  font-size: clamp(2.2rem,11vw,3.6rem);
+  color: var(--glow);
+  text-shadow: 0 0 12px var(--glow), 0 0 28px rgba(0,255,200,.18);
+  text-align: right; line-height:1; word-break:break-all; margin-bottom:4px;
+}
+.c-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap: clamp(4px,1.2vw,7px); flex:1;
+}
+.cb {
+  border:none; border-radius:8px;
+  font-family:'Press Start 2P',monospace;
+  font-size: clamp(.26rem,1.6vw,.4rem);
+  height: clamp(26px,8.5vw,38px);
+  position:relative; letter-spacing:-.5px;
+  transition: filter .07s, transform .07s, box-shadow .07s;
+  pointer-events: none;
+  cursor: default;
+}
+.cb::after {
+  content:''; position:absolute; inset:0; border-radius:8px;
+  background:linear-gradient(to bottom,rgba(255,255,255,.2) 0%,transparent 55%);
+  pointer-events:none;
+}
+.cb.act { transform:scale(.87) translateY(2px); filter:brightness(.65); }
+.cb.focused {
+  outline:none;
+  box-shadow: 0 0 0 3px rgba(0,255,200,.95), 0 0 14px rgba(0,255,200,.4) !important;
+  filter:brightness(1.22); transform:scale(1.05); z-index:2; position:relative;
+}
+.cb-n  { background:var(--w);  color:#282820; box-shadow:0 3px 0 #9a9888; }
+.cb-f  { background:var(--fn); color:#182414; box-shadow:0 3px 0 #608845; }
+.cb-o  { background:var(--y);  color:#382800; box-shadow:0 3px 0 #a07800; font-size:clamp(.3rem,2vw,.48rem); }
+.cb-eq { background:var(--r);  color:#fff;    box-shadow:0 3px 0 #9e1818; font-size:clamp(.3rem,2vw,.48rem); }
+.cb-s2 { grid-column:span 2; }
+@keyframes errfl { 0%,100%{color:var(--glow);}50%{color:#ff3a3a;text-shadow:0 0 16px #ff3a3a;} }
+.c-disp.err { animation:errfl .3s 2; }
+
+/* ── FLAPPY ── */
+#p-flappy { padding:0; background:#050d07; }
+#fcanvas { position:absolute; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+
+/* ── CONTROLS SECTION ── */
+.ctrl-section {
+  flex-shrink:0;
+  height: clamp(155px,37%,225px);
+  padding: clamp(4px,1.2vw,7px) clamp(14px,4.5vw,26px) clamp(6px,2vw,12px);
+  display:flex; flex-direction:column;
+  gap: clamp(4px,1.2vw,8px);
+  position:relative; z-index:1;
+}
+.slot {
+  height:8px; flex-shrink:0;
+  background:linear-gradient(to bottom, #1e5a48, #122e22);
+  border-radius:6px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.1);
+  position:relative;
+}
+.slot::after {
+  content:''; position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  width:9px; height:9px; border-radius:50%;
+  background:radial-gradient(circle at 36% 34%, #4a6a60, #1a3830);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+}
+.ctrl-row {
+  flex:1; min-height:0;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+/* ── D-PAD ── */
+.dpad {
+  position:relative;
+  width: clamp(90px,27vw,118px);
+  height: clamp(90px,27vw,118px);
+  flex-shrink:0;
+  filter:drop-shadow(0 5px 12px rgba(0,0,0,.45));
+}
+.dp {
+  position:absolute;
+  background:radial-gradient(ellipse at 50% 22%, #ffe860, #dea000 58%, #a87800 100%);
+  border-radius:5px;
+  box-shadow: 0 4px 0 #7a5000, inset 0 1px 0 rgba(255,245,130,.4);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.55rem; color:rgba(100,60,0,.45);
+  transition: filter .06s, transform .06s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp:active, .dp.act { filter:brightness(.68); transform:scale(.88); }
+.dp-u { width:34%; height:34%; top:0;    left:33%; border-radius:6px 6px 2px 2px; }
+.dp-d { width:34%; height:34%; bottom:0; left:33%; border-radius:2px 2px 6px 6px; }
+.dp-l { width:34%; height:34%; left:0;   top:33%;  border-radius:6px 2px 2px 6px; }
+.dp-r { width:34%; height:34%; right:0;  top:33%;  border-radius:2px 6px 6px 2px; }
+.dp-c {
+  position:absolute; width:34%; height:34%; top:33%; left:33%;
+  border-radius:5px; z-index:2;
+  background:radial-gradient(ellipse at 50% 28%, #ffe870, #cc9000);
+  cursor:pointer; box-shadow:0 2px 0 #7a5000;
+  transition: filter .06s, transform .06s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-c:active, .dp-c.act { filter:brightness(.68); transform:scale(.88); }
+
+/* ── HOME BUTTON ── */
+.center-area { display:flex; flex-direction:column; align-items:center; gap:5px; }
+.home-btn {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:linear-gradient(160deg, #1e5a48, #0e3028);
+  border: 2.5px solid rgba(0,255,200,.45);
+  border-radius:12px;
+  padding: clamp(7px,2.2vw,11px) clamp(12px,3.5vw,18px);
+  box-shadow: 0 4px 0 #0a2018, 0 6px 14px rgba(0,0,0,.4),
+              inset 0 1px 0 rgba(255,255,255,.09),
+              0 0 16px rgba(0,255,200,.1);
+  cursor:pointer;
+  transition: filter .08s, transform .08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-btn:active, .home-btn.act {
+  transform:scale(.88) translateY(3px); filter:brightness(.65);
+  box-shadow: 0 1px 0 #0a2018, 0 2px 6px rgba(0,0,0,.3);
+}
+.home-icon { font-size: clamp(.9rem,3.8vw,1.3rem); line-height:1; }
+.home-label {
+  font-family:'Press Start 2P',monospace;
+  font-size: clamp(.18rem,1.3vw,.28rem);
+  color:rgba(0,255,200,.75); letter-spacing:.5px;
+}
+
+/* ── ACTION BUTTONS ── */
+.abgroup {
+  position:relative;
+  width: clamp(82px,25vw,108px);
+  height: clamp(82px,25vw,108px);
+  flex-shrink:0;
+}
+.ab-tri {
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  cursor:pointer;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.4));
+  transition:filter .07s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ab-tri:active,.ab-tri.act { filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) brightness(.65); }
+.ab-tri::before {
+  content:''; display:block; width:0; height:0;
+  border-left:  clamp(10px,3.5vw,14px) solid transparent;
+  border-right: clamp(10px,3.5vw,14px) solid transparent;
+  border-bottom:clamp(16px,5.5vw,22px) solid #4a90e0;
+}
+.ab-tri::after {
+  content:''; display:block; position:absolute;
+  width:0; height:0;
+  top:clamp(4px,1.4vw,6px); left:50%; transform:translateX(-50%);
+  border-left:  clamp(6px,2.2vw,8px) solid transparent;
+  border-right: clamp(6px,2.2vw,8px) solid transparent;
+  border-bottom:clamp(10px,3.4vw,13px) solid #88ccff;
+}
+.ab-r, .ab-g {
+  position:absolute; bottom:0;
+  width: clamp(28px,8.5vw,36px); height:clamp(28px,8.5vw,36px);
+  border-radius:50%; cursor:pointer;
+  transition:transform .07s,filter .07s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ab-r:active,.ab-r.act,.ab-g:active,.ab-g.act { transform:scale(.84) translateY(3px); filter:brightness(.65); }
+.ab-r {
+  left:clamp(2px,1vw,5px);
+  background:radial-gradient(circle at 36% 30%, #ff9090, #c82020);
+  box-shadow: 0 clamp(3px,1vw,4px) 0 #881010, 0 5px 12px rgba(200,0,0,.3);
+}
+.ab-g {
+  right:clamp(2px,1vw,5px);
+  background:radial-gradient(circle at 36% 30%, #88ee88, #1ea030);
+  box-shadow: 0 clamp(3px,1vw,4px) 0 #0e6818, 0 5px 12px rgba(0,160,40,.3);
+}
+
+/* ── FEET ── */
+.feet { display:flex; justify-content:center; gap:clamp(48px,15vw,78px); flex-shrink:0; }
+.foot {
+  width:clamp(50px,15vw,70px); height:clamp(10px,3vw,13px);
+  background:linear-gradient(to bottom, var(--bmo-d), var(--bmo-dd));
+  border-radius:0 0 12px 12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.35), 0 3px 0 var(--out);
+}
+
+/* ── MOODS ── */
+.bmo.happy   .feye  { transform:scaleY(.42); }
+.bmo.sad     .fmouth{ border-bottom:none; border-top:2.5px solid #3a4a3a; border-radius:20px 20px 0 0; margin-top:8px; }
+.bmo.excited .feye  { transform:scale(1.3); }
+</style>
+</head>
+<body>
+<div class="bmo" id="bmo">
+
+  <div class="port port-l"></div>
+  <div class="port port-r"></div>
+
+  <div class="screen-area">
+    <div class="screen-frame">
+      <div class="screen" id="screen">
+
+        <!-- MENU -->
+        <div class="panel" id="p-menu">
+          <div class="face">
+            <div class="face-eyes"><div class="feye"></div><div class="feye"></div></div>
+            <div class="fmouth"></div>
+          </div>
+          <div class="menu-title">WHO WANTS TO<br>PLAY VIDEO GAMES?</div>
+          <div class="menu-cards">
+            <div class="mcard sel" id="mc0"><span class="icon">🐦</span>FLAPPY</div>
+            <div class="mcard"     id="mc1"><span class="icon">🔢</span>CALC</div>
+          </div>
+          <div class="menu-hint">◀ ▶ SCEGLI &nbsp; ● CONFERMA</div>
+        </div>
+
+        <!-- CALCULATOR -->
+        <div class="panel off" id="p-calc">
+          <div class="c-expr" id="c-expr"></div>
+          <div class="c-disp" id="c-disp">0</div>
+          <div class="c-grid">
+            <button class="cb cb-f" data-a="clear">AC</button>
+            <button class="cb cb-f" data-a="sign">±</button>
+            <button class="cb cb-f" data-a="pct">%</button>
+            <button class="cb cb-o" data-a="op" data-v="÷">÷</button>
+            <button class="cb cb-n" data-a="n" data-v="7">7</button>
+            <button class="cb cb-n" data-a="n" data-v="8">8</button>
+            <button class="cb cb-n" data-a="n" data-v="9">9</button>
+            <button class="cb cb-o" data-a="op" data-v="×">×</button>
+            <button class="cb cb-n" data-a="n" data-v="4">4</button>
+            <button class="cb cb-n" data-a="n" data-v="5">5</button>
+            <button class="cb cb-n" data-a="n" data-v="6">6</button>
+            <button class="cb cb-o" data-a="op" data-v="−">−</button>
+            <button class="cb cb-n" data-a="n" data-v="1">1</button>
+            <button class="cb cb-n" data-a="n" data-v="2">2</button>
+            <button class="cb cb-n" data-a="n" data-v="3">3</button>
+            <button class="cb cb-o" data-a="op" data-v="+">+</button>
+            <button class="cb cb-n cb-s2" data-a="n" data-v="0">0</button>
+            <button class="cb cb-n" data-a="dot">.</button>
+            <button class="cb cb-eq" data-a="eq">=</button>
+          </div>
+        </div>
+
+        <!-- FLAPPY -->
+        <div class="panel off" id="p-flappy">
+          <canvas id="fcanvas"></canvas>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="ctrl-section">
+    <div class="slot"></div>
+    <div class="ctrl-row">
+      <div class="dpad">
+        <div class="dp dp-u" id="dp-u">▲</div>
+        <div class="dp dp-d" id="dp-d">▼</div>
+        <div class="dp dp-l" id="dp-l">◀</div>
+        <div class="dp dp-r" id="dp-r">▶</div>
+        <div class="dp-c"    id="dp-c"></div>
+      </div>
+      <div class="center-area">
+        <div class="home-btn" id="home-btn">
+          <span class="home-icon">🏠</span>
+          <span class="home-label">MENU</span>
+        </div>
+      </div>
+      <div class="abgroup">
+        <div class="ab-tri" id="ab-t"></div>
+        <div class="ab-r"   id="ab-r"></div>
+        <div class="ab-g"   id="ab-g"></div>
+      </div>
+    </div>
+    <div class="feet"><div class="foot"></div><div class="foot"></div></div>
+  </div>
+
+</div>
+<script>
+/* ════════════════════════════════════
+   STATE & PANELS
+════════════════════════════════════ */
+let mode    = 'menu';
+let menuSel = 0;
+
+function showPanel(name) {
+  ['menu','calc','flappy'].forEach(n =>
+    document.getElementById('p-'+n).classList.toggle('off', n !== name)
+  );
+  mode = name;
+}
+
+function mood(m) {
+  const b = document.getElementById('bmo');
+  b.classList.remove('happy','sad','excited');
+  if (m) b.classList.add(m);
+}
+
+function goMenu() {
+  stopFlappy();
+  calcClear();
+  showPanel('menu');
+  mood('');
+  menuHL(menuSel);
+}
+
+/* ════════════════════════════════════
+   MENU
+════════════════════════════════════ */
+function menuHL(i) {
+  menuSel = i;
+  document.querySelectorAll('.mcard').forEach((el,j) => el.classList.toggle('sel', j===i));
+}
+
+function menuOpen() {
+  mood('excited');
+  if (menuSel === 0) {
+    showPanel('flappy');
+    requestAnimationFrame(() => requestAnimationFrame(() => { startFlappy(); mood(''); }));
+  } else {
+    showPanel('calc');
+    cRow=3; cCol=0; calcFocus(); mood('');
+  }
+}
+
+/* ════════════════════════════════════
+   D-PAD & BUTTONS  — exclusive input
+════════════════════════════════════ */
+function onDpad(dir) {
+  if (mode === 'menu') {
+    if (dir==='l'||dir==='r') menuHL((menuSel+1)%2);
+    if (dir==='c'||dir==='d') menuOpen();
+  } else if (mode === 'flappy') {
+    fFlap();
+  } else if (mode === 'calc') {
+    if (dir==='u') cMove(-1, 0);
+    if (dir==='d') cMove( 1, 0);
+    if (dir==='l') cMove( 0,-1);
+    if (dir==='r') cMove( 0, 1);
+    if (dir==='c') cPress();
+  }
+}
+
+function onAction(btn) {
+  if (btn==='t') {
+    if (mode==='calc')   calcBackspace();
+    else if (mode==='flappy') fFlap();
+    else menuOpen();
+    return;
+  }
+  if (btn==='r'||btn==='g') {
+    if (mode==='menu')         menuOpen();
+    else if (mode==='calc')    cPress();
+    else if (mode==='flappy')  fFlap();
+  }
+}
+
+/* ── wire elements ── */
+function wire(id, fn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); anim(id); });
+}
+['u','d','l','r'].forEach(d => wire('dp-'+d, () => onDpad(d)));
+wire('dp-c', () => onDpad('c'));
+wire('ab-t', () => onAction('t'));
+wire('ab-r', () => onAction('r'));
+wire('ab-g', () => onAction('g'));
+wire('home-btn', () => goMenu());
+
+function anim(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('act');
+  setTimeout(() => el.classList.remove('act'), 100);
+}
+
+/* ── keyboard ── */
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (k==='ArrowLeft')  { e.preventDefault(); onDpad('l'); }
+  if (k==='ArrowRight') { e.preventDefault(); onDpad('r'); }
+  if (k==='ArrowUp')    { e.preventDefault(); onDpad('u'); }
+  if (k==='ArrowDown')  { e.preventDefault(); onDpad('d'); }
+  if (k===' ')          { e.preventDefault(); onDpad('c'); }
+  if (k==='Enter')      { e.preventDefault(); onDpad('c'); }
+  if (k==='Escape')     goMenu();
+  if (k==='Backspace'&&mode==='calc') calcBackspace();
+  if (mode==='calc') {
+    if (k>='0'&&k<='9') { calcNum(k); cJump(k); }
+    else if(k==='.') calcDot();
+    else if(k==='+') calcOp('+');
+    else if(k==='-') calcOp('−');
+    else if(k==='*') calcOp('×');
+    else if(k==='/')   { e.preventDefault(); calcOp('÷'); }
+    else if(k==='='||k==='Enter') { e.preventDefault(); calcEquals(); }
+    else if(k==='%') { cv=String(parseFloat(cv)/100); updC(cv); }
+  }
+});
+
+/* ════════════════════════════════════
+   CALCULATOR
+════════════════════════════════════ */
+let cv='0', pv='', op=null, rst=false, evd=false;
+const DE = document.getElementById('c-disp');
+const EE = document.getElementById('c-expr');
+
+function updC(v) {
+  const s=String(v);
+  DE.textContent = s.length>12 ? parseFloat(v).toExponential(3) : s;
+}
+function calcNum(v) {
+  if (rst||evd) { cv=v; rst=false; evd=false; }
+  else cv = cv==='0'&&v!=='.' ? v : cv.length>=12 ? cv : cv+v;
+  updC(cv);
+}
+function calcDot() {
+  if (rst||evd) { cv='0.'; rst=false; evd=false; updC(cv); return; }
+  if (!cv.includes('.')) { cv+='.'; updC(cv); }
+}
+function calcOp(o) {
+  evd=false;
+  if (op&&!rst) {
+    const r=compute(parseFloat(pv),parseFloat(cv),op); if(r===null)return;
+    pv=String(r); updC(r); cv=String(r);
+  } else pv=cv;
+  op=o; rst=true; EE.textContent=`${pv} ${o}`;
+}
+function calcEquals() {
+  if(!op||rst) return;
+  const r=compute(parseFloat(pv),parseFloat(cv),op); if(r===null)return;
+  EE.textContent=`${pv} ${op} ${cv} =`;
+  cv=String(r); op=null; rst=false; evd=true; updC(r);
+}
+function calcBackspace() { cv=cv.length>1?cv.slice(0,-1):'0'; updC(cv); }
+function calcClear() { cv='0'; pv=''; op=null; rst=false; evd=false; updC('0'); EE.textContent=''; }
+function compute(a,b,o) {
+  if(o==='÷'&&b===0) { calcErr(); return null; }
+  const m={'+':a+b,'−':a-b,'×':a*b,'÷':a/b};
+  return parseFloat((m[o]??0).toPrecision(12));
+}
+function calcErr() {
+  DE.textContent='ERR'; DE.classList.add('err'); mood('sad');
+  setTimeout(()=>{ DE.classList.remove('err'); calcClear(); mood(''); },700);
+}
+
+/* calc cursor
+   Row 0: AC  ±   %   ÷
+   Row 1: 7   8   9   ×
+   Row 2: 4   5   6   −
+   Row 3: 1   2   3   +
+   Row 4: 0(c=0-1)  .(c=2)  =(c=3)
+*/
+let cRow=3, cCol=0;
+
+function calcBtns() { return Array.from(document.querySelectorAll('.cb')); }
+function calcIdx(r,c) {
+  if (r<4) return r*4 + Math.min(c,3);
+  if (c<=1) return 16;
+  if (c===2) return 17;
+  return 18;
+}
+function calcFocus() {
+  const btns=calcBtns();
+  btns.forEach(b=>b.classList.remove('focused'));
+  const idx=calcIdx(cRow,cCol);
+  if (btns[idx]) btns[idx].classList.add('focused');
+}
+function cMove(dr,dc) {
+  cRow=Math.max(0,Math.min(4,cRow+dr));
+  cCol=Math.max(0,Math.min(3,cCol+dc));
+  calcFocus();
+}
+function cPress() {
+  const btns=calcBtns();
+  const idx=calcIdx(cRow,cCol);
+  if (!btns[idx]) return;
+  btns[idx].classList.add('act');
+  setTimeout(()=>btns[idx].classList.remove('act'),90);
+  doCalc(btns[idx]);
+}
+function doCalc(btn) {
+  const a=btn.dataset.a, v=btn.dataset.v;
+  if(a==='n') calcNum(v);
+  else if(a==='dot') calcDot();
+  else if(a==='op')  calcOp(v);
+  else if(a==='eq')  calcEquals();
+  else if(a==='clear') calcClear();
+  else if(a==='sign') { cv=String(parseFloat(cv)*-1); updC(cv); }
+  else if(a==='pct')  { cv=String(parseFloat(cv)/100); updC(cv); }
+}
+function cJump(d) {
+  const m={'7':[1,0],'8':[1,1],'9':[1,2],'4':[2,0],'5':[2,1],'6':[2,2],
+           '1':[3,0],'2':[3,1],'3':[3,2],'0':[4,0]};
+  if(m[d]){[cRow,cCol]=m[d];calcFocus();}
+}
+
+/* ════════════════════════════════════
+   FLAPPY BIRD
+════════════════════════════════════ */
+let fRAF=null, fFlag=false;
+
+function fFlap() { fFlag=true; }
+function stopFlappy() { if(fRAF){cancelAnimationFrame(fRAF);fRAF=null;} }
+
+function startFlappy() {
+  stopFlappy(); fFlag=false;
+
+  const cvs   = document.getElementById('fcanvas');
+  const panel = document.getElementById('p-flappy');
+  const W = panel.clientWidth  || 300;
+  const H = panel.clientHeight || 280;
+  cvs.width=W; cvs.height=H;
+  const ctx = cvs.getContext('2d');
+
+  const GRAV = .25;
+  const FV   = -4.6;
+  const SPD  = 2.1;
+  const PW   = 18;
+  /* ── GAP intermedio ~38% dell'altezza ── */
+  const GAP  = Math.floor(H * .30);
+  const BR   = Math.min(13, W*.044);
+
+  let bird  = {x:W*.28, y:H/2, vy:0};
+  let pipes = [], score=0, frames=0;
+  let best  = +localStorage.getItem('bmo_fb')||0;
+  let state = 'idle', deadT=0;
+  fFlag=false;
+
+  const reset=()=>{
+    bird={x:W*.28,y:H/2,vy:0}; pipes=[]; score=0; frames=0;
+    state='play'; mood('excited'); fFlag=false;
+  };
+
+  function tick(){
+    if(fFlag){
+      fFlag=false;
+      if(state==='idle') reset();
+      else if(state==='play') bird.vy=FV;
+      else if(state==='dead'&&deadT>22) reset();
+    }
+  }
+
+  let lastCenter = H * .5;
+  function spawnPipe(){
+    /* vary 18%-82%, max vertical jump = 30% of H from last pipe */
+    const minC   = H*.10 + GAP/2;
+    const maxC   = H*.90 - GAP/2;
+    const step   = H * .55;
+    const lo     = Math.max(minC, lastCenter - step);
+    const hi     = Math.min(maxC, lastCenter + step);
+    lastCenter   = lo + Math.random()*(hi - lo);
+    const t      = Math.max(16, lastCenter - GAP/2);
+    pipes.push({x:W, t, scored:false});
+  }
+
+  function drawBMO(x,y,dead){
+    const r=BR;
+    ctx.save(); ctx.translate(x,y);
+    if(dead) ctx.rotate(.44);
+    ctx.fillStyle='#5ecfb1';
+    ctx.beginPath(); ctx.roundRect(-r,-r,r*2,r*2,4); ctx.fill();
+    ctx.strokeStyle='#2a8a6e'; ctx.lineWidth=1.4; ctx.stroke();
+    ctx.fillStyle='#07120e';
+    ctx.beginPath(); ctx.roundRect(-r*.52,-r*.62,r*1.04,r*.88,2); ctx.fill();
+    ctx.strokeStyle='#00ffcc'; ctx.lineWidth=.8;
+    ctx.shadowColor='#00ffcc'; ctx.shadowBlur=4;
+    ctx.beginPath(); ctx.moveTo(-r*.33,-r*.2); ctx.lineTo(r*.33,-r*.2); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#e0e0e0'; ctx.beginPath(); ctx.arc(-r*.13,r*.16,r*.21,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#1a2820'; ctx.beginPath(); ctx.arc(-r*.09,r*.19,r*.11,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#2a5a40'; ctx.lineWidth=1.3;
+    if(!dead){ctx.beginPath();ctx.arc(r*.19,r*.36,r*.18,0,Math.PI);ctx.stroke();}
+    else     {ctx.beginPath();ctx.arc(r*.19,r*.50,r*.18,Math.PI,0);ctx.stroke();}
+    ctx.restore();
+  }
+
+  function drawPipe(p){
+    const g=ctx.createLinearGradient(p.x,0,p.x+PW,0);
+    g.addColorStop(0,'#28876a'); g.addColorStop(.5,'#5ecfb1'); g.addColorStop(1,'#1a5e48');
+    ctx.fillStyle=g; ctx.strokeStyle='#1a5848'; ctx.lineWidth=1.4;
+    if(p.t>0){
+      ctx.beginPath(); ctx.roundRect(p.x,0,PW,p.t-8,[0,0,2,2]); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(p.x-3,p.t-11,PW+6,11,3); ctx.fill(); ctx.stroke();
+    }
+    const by=p.t+GAP;
+    if(by<H){
+      ctx.beginPath(); ctx.roundRect(p.x,by+8,PW,H-by,[2,2,0,0]); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(p.x-3,by,PW+6,11,3); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  function drawBg(){
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#040b06'); g.addColorStop(1,'#071209');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(150,255,190,.25)';
+    [[8,6],[31,18],[64,3],[106,14],[155,2],[205,12],[244,24],[22,47],[86,36],[180,46],[241,5],[55,28]].forEach(
+      ([sx,sy])=>ctx.fillRect(sx,sy,1,1)
+    );
+  }
+
+  const fs=(n,min)=>Math.max(min,W*n);
+
+  function loop(){
+    fRAF=requestAnimationFrame(loop);
+    if(mode!=='flappy') return;
+    tick();
+
+    if(state==='idle'){
+      drawBg();
+      const by=H/2+Math.sin(Date.now()*.002)*5;
+      drawBMO(bird.x,by,false);
+      ctx.font=`${fs(.026,7)}px "Press Start 2P"`;
+      ctx.fillStyle='rgba(0,255,200,.7)'; ctx.textAlign='center';
+      ctx.fillText('PREMI IL DPAD',W/2,H-28);
+      ctx.fillText('PER INIZIARE',W/2,H-14);
+      return;
+    }
+
+    if(state==='play'){
+      frames++;
+      bird.vy+=GRAV; bird.y+=bird.vy;
+      /* closer pipes: interval starts at 120, min 78 */
+      const interval=Math.max(78,120-score*2);
+      if(frames%Math.round(interval/SPD)===0) spawnPipe();
+      for(let i=pipes.length-1;i>=0;i--){
+        pipes[i].x-=SPD;
+        if(!pipes[i].scored&&pipes[i].x+PW<bird.x){
+          score++; pipes[i].scored=true;
+          if(score>best){best=score;localStorage.setItem('bmo_fb',best);}
+        }
+        if(pipes[i].x+PW<0) pipes.splice(i,1);
+      }
+      const br2=BR-2,bx=bird.x,by=bird.y;
+      let hit=by-br2<0||by+br2>H;
+      for(const p of pipes)
+        if(bx+br2>p.x&&bx-br2<p.x+PW&&(by-br2<p.t||by+br2>p.t+GAP)) hit=true;
+      if(hit){state='dead';deadT=0;mood('sad');}
+      drawBg(); pipes.forEach(drawPipe); drawBMO(bx,by,false);
+      ctx.font=`bold ${fs(.044,9)}px "Press Start 2P"`;
+      ctx.fillStyle='rgba(0,255,200,.9)'; ctx.textAlign='center';
+      ctx.fillText(score,W/2,fs(.044,9)+4);
+      ctx.font=`${fs(.02,5)}px "Press Start 2P"`;
+      ctx.fillStyle='rgba(0,255,200,.3)'; ctx.textAlign='right';
+      ctx.fillText('BEST '+best,W-4,12);
+    }
+
+    if(state==='dead'){
+      deadT++;
+      drawBg(); pipes.forEach(drawPipe); drawBMO(bird.x,bird.y,true);
+      ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.font=`${fs(.034,8)}px "Press Start 2P"`; ctx.fillStyle='#ff4a4a';
+      ctx.fillText('GAME OVER',W/2,H/2-fs(.034,8)*1.4);
+      ctx.font=`${fs(.022,6)}px "Press Start 2P"`; ctx.fillStyle='rgba(0,255,200,.85)';
+      ctx.fillText('SCORE: '+score,W/2,H/2+2);
+      ctx.fillText('BEST:  '+best, W/2,H/2+18);
+      if(deadT>22){
+        ctx.fillStyle='rgba(0,255,200,.42)';
+        ctx.fillText('DPAD = RIPROVA',W/2,H/2+36);
+        ctx.fillText('🏠 = MENU',     W/2,H/2+52);
+      }
+    }
+  }
+  loop();
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+showPanel('menu');
+updC('0');
+menuHL(0);
+</script>
+</body>
+</html>
