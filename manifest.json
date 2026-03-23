@@ -1,20 +1,20 @@
 {
   "name": "BMO",
   "short_name": "BMO",
-  "description": "BMO from Adventure Time \u2014 Flappy Bird, Calculator & Pomodoro",
+  "description": "BMO from Adventure Time — Flappy Bird, Calculator & Pomodoro",
   "id": "/BmoPlayground/",
   "start_url": "/BmoPlayground/",
   "scope": "/BmoPlayground/",
   "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#3aaa88",
   "theme_color": "#3aaa88",
   "lang": "en",
-  "categories": [
-    "games",
-    "utilities",
-    "productivity"
-  ],
+  "dir": "ltr",
+  "categories": ["games", "utilities", "productivity"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
@@ -29,5 +29,41 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": []
+  "screenshots": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "BMO Home Screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Flappy Bird",
+      "short_name": "Flappy",
+      "url": "/BmoPlayground/",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calculator",
+      "short_name": "Calc",
+      "url": "/BmoPlayground/",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pomodoro",
+      "short_name": "Pomo",
+      "url": "/BmoPlayground/",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "share_target": {
+    "action": "/BmoPlayground/",
+    "method": "GET",
+    "params": { "title": "title" }
+  }
 }
