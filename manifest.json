@@ -6,7 +6,7 @@
   "start_url": "/BmoPlayground/",
   "scope": "/BmoPlayground/",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "display_override": ["fullscreen", "standalone", "minimal-ui", "window-controls-overlay", "tabbed"],
   "orientation": "portrait",
   "background_color": "#3aaa88",
   "theme_color": "#3aaa88",
@@ -18,8 +18,12 @@
   "related_applications": [],
   "scope_extensions": [],
   "file_handlers": [],
-  "protocol_handlers": [],
-  "edge_side_panel": {},
+  "protocol_handlers": [
+    { "protocol": "web+bmo", "url": "/BmoPlayground/?url=%s" }
+  ],
+  "edge_side_panel": { "preferred_width": 400 },
+  "note_taking": { "new_note_url": "/BmoPlayground/" },
+  "handle_links": "preferred",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
@@ -27,20 +31,8 @@
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "screenshots": [
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "BMO"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "BMO Wide"
-    }
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "narrow", "label": "BMO" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "wide",   "label": "BMO Wide" }
   ],
   "shortcuts": [
     { "name": "Flappy Bird", "short_name": "Flappy", "url": "/BmoPlayground/", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
